@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    command: gunicorn ishemalink_api.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ishemalink
+      POSTGRES_USER: ishema
+      POSTGRES_PASSWORD: ishema123
+    ports:
+      - "5432:5432"

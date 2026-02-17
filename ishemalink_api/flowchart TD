@@ -1,0 +1,83 @@
+flowchart TD
+    subgraph WebApp [IshemaLink Web API]
+        Core[Core Service]
+        Domestic[Domestic Module]
+        International[International Module]
+        Booking[BookingService]
+        Payment[Payment Gateway Adapter (MomoMock)]
+        Notify[Notification Engine]
+        Tracking[Real-time Tracking Service]
+        Admin[Admin Dashboard API]
+        Analytics[Analytics/BI Service]
+        GovRRA[RRAConnector]
+        GovRURA[RURAConnector]
+        Customs[Customs Manifest Generator]
+    end
+
+    subgraph Mobile
+        MobileApp[Mobile App (Offline Sync)]
+    end
+
+    subgraph Infra [Infrastructure]
+        DB[(PostgreSQL + PgBouncer)]
+        Redis[(Redis)]
+        Worker[Celery Worker]
+        Nginx[Nginx + Gunicorn]
+        Prometheus[Prometheus]
+        Grafana[Grafana]
+        S3[S3/MinIO (Backups)]
+    end
+
+    subgraph GovAPIs [Government APIs]
+        RRA[RRA EBM API]
+        RURA[RURA License API]
+        CustomsAPI[Customs API]
+    end
+
+    subgraph External
+        MTN[MTN Momo API]
+        Airtel[Airtel Money API]
+        SMS[SMS Gateway]
+        Email[Email Service]
+    end
+
+    User((Agent/Exporter))
+    AdminUser((Admin/Control Tower))
+
+    User-->|"Book Shipment"|Booking
+    Booking-->|"Domestic/Intl Logic"|Domestic
+    Booking-->|"Domestic/Intl Logic"|International
+    Booking-->|"Tariff, Assign Driver"|Core
+    Booking-->|"Request Payment"|Payment
+    Payment-->|"Momo Callback"|Booking
+    Payment-->|"Webhook"|MTN
+    Payment-->|"Webhook"|Airtel
+    Booking-->|"Send SMS/Email"|Notify
+    Notify-->|"SMS"|SMS
+    Notify-->|"Email"|Email
+    Booking-->|"Track Truck"|Tracking
+    Tracking-->|"WebSocket/Polling"|MobileApp
+    Booking-->|"Gov Checks"|GovRRA
+    Booking-->|"Gov Checks"|GovRURA
+    Booking-->|"Customs Manifest"|Customs
+    GovRRA-->|"EBM Receipt"|RRA
+    GovRURA-->|"License Check"|RURA
+    Customs-->|"Manifest XML"|CustomsAPI
+    Booking-->|"DB/Redis"|DB
+    Booking-->|"DB/Redis"|Redis
+    Booking-->|"Async Tasks"|Worker
+    AdminUser-->|"Dashboard"|Admin
+    Admin-->|"Summary, Broadcast"|Booking
+    Admin-->|"Analytics"|Analytics
+    Analytics-->|"DB Queries"|DB
+    Analytics-->|"Anonymized Export"|S3
+    Nginx-->|"Reverse Proxy"|WebApp
+    WebApp-->|"API Calls"|Nginx
+    Worker-->|"Background Jobs"|DB
+    Worker-->|"Background Jobs"|Redis
+    Prometheus-->|"Metrics"|WebApp
+    Prometheus-->|"Metrics"|Worker
+    Grafana-->|"Dashboards"|Prometheus
+    S3-->|"Backups"|DB
+    S3-->|"Backups"|Redis
+    MobileApp-->|"Sync Data"|WebApp
