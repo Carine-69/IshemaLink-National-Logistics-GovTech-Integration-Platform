@@ -1,3 +1,6 @@
 Django>=4.2
 djangorestframework
 python-dotenv
+gunicorn
+psycopg2-binary
+python-dotenv

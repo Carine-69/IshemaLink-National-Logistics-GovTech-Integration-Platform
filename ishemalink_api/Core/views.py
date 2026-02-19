@@ -44,7 +44,7 @@ def payment_webhook_view(request):
 @csrf_exempt
 def dashboard_html_view(request):
     active_trucks = Shipment.objects.filter(status="confirmed").count()
-    total_revenue = Shipment.objects.filter(status="confirmed").aggregate(total=models.Sum('tariff'))['total'] or 0
+    totl_revenue = Shipment.objects.filter(status="confirmed").aggregate(total=models.Sum('tariff'))['total'] or 0
     available_drivers = Driver.objects.filter(is_available=True).count()
     return render(request, "dashboard.html", {
         "active_trucks": active_trucks,
@@ -127,4 +127,4 @@ def gov_audit_access_log_view(request):
     ]
     return JsonResponse({"audit_log": logs})
 
-# Create your views here.
+# Create your views he.
